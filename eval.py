@@ -12,11 +12,11 @@ class LikeSyntaxError(Exception):
 
 class LikeEvaluator(Transformer):
     def __init__(self):
-        self.scope: List[Dict[str, Any]] = [{}]
-        self.func_counter: int = 0
+        self._scopes: List[Dict[str, Any]] = [{}]
+        self._func_counter: int = 0
 
     def _should_not_eval(self) -> bool:
-        return self.func_counter > 0
+        return self._func_counter > 0
 
     @v_args(tree=True)
     def expression(self, tree: Tree):
@@ -61,8 +61,8 @@ class LikeEvaluator(Transformer):
             return tree
 
         identifier, res = cast(List, tree.children)
-        self.scope[-1][identifier] = {"type": "var", "value": res}
-        return self.scope[-1][identifier]
+        self._scopes[-1][identifier] = {"type": "var", "value": res}
+        return self._scopes[-1][identifier]
 
     @v_args(tree=True)
     def identifier(self, tree: Tree):
@@ -83,10 +83,10 @@ class LikeEvaluator(Transformer):
         return ident["value"]
 
     def start_fn(self, _):
-        self.func_counter += 1
+        self._func_counter += 1
 
     def end_fn(self, _):
-        self.func_counter -= 1
+        self._func_counter -= 1
 
     @v_args(tree=True)
     def function(self, tree: Tree):
@@ -94,8 +94,8 @@ class LikeEvaluator(Transformer):
             return tree
 
         name, args, _, body, _ = cast(List, tree.children)
-        self.scope[-1][name] = {"type": "fn", "args": args, "body": body}
-        return self.scope[-1][name]
+        self._scopes[-1][name] = {"type": "fn", "args": args, "body": body}
+        return self._scopes[-1][name]
 
     @v_args(tree=True)
     def func_call(self, tree: Tree):
@@ -112,14 +112,14 @@ class LikeEvaluator(Transformer):
             raise LikeSyntaxError(
                 "expected: {} args, got only {}.".format(len(ident_scope), len(args))
             )
-        self.scope.append(
+        self._scopes.append(
             {
                 param: {"value": arg, "type": "var"}
                 for param, arg in zip(ident_scope["args"], args)
             }
         )
         result = self.transform(ident_scope["body"])
-        self.scope.pop()
+        self._scopes.pop()
         print("result", result)
         return result
 
@@ -146,6 +146,6 @@ class LikeEvaluator(Transformer):
         return tree.children[-1]
 
     def _get_ident(self, ident: str):
-        for scope in reversed(self.scope):
+        for scope in reversed(self._scopes):
             if ident in scope.keys():
                 return scope[ident]
