@@ -5,8 +5,13 @@ fn somefunc (a, b) {
 
     fn somefunc2 () {
         let c = 10 * 10
+
+        c
     }
 
-    let d = (10 * (20 + 30)) / 40
-    somefunc2()
+    let d = (b * (a + 30)) / 40
+
+    d
 }
+
+somefunc(20, 30)

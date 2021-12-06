@@ -1,7 +1,9 @@
+from typing import Any, Dict, List, cast
+
 from lark import Transformer
 from lark.lexer import Token
 from lark.tree import Tree
-from typing import List, Dict, Any
+from lark.visitors import v_args
 
 
 class LikeSyntaxError(Exception):
@@ -13,11 +15,15 @@ class LikeEvaluator(Transformer):
         self.scope: List[Dict[str, Any]] = [{}]
         self.func_counter: int = 0
 
-    def expression(self, items):
-        if self.func_counter:
-            return items
+    def _should_not_eval(self) -> bool:
+        return self.func_counter > 0
 
-        print(items)
+    @v_args(tree=True)
+    def expression(self, tree: Tree):
+        if self._should_not_eval():
+            return tree
+
+        items = cast(List, tree.children)
 
         if len(items) == 3:
             op1, operator, op2 = items
@@ -42,33 +48,61 @@ class LikeEvaluator(Transformer):
                 f"Expression did not get 3 things what to dooo: {items}"
             )
 
-    def number(self, num_str: Token):
-        return float(num_str[0])
+    @v_args(tree=True)
+    def number(self, tree: Tree):
+        if self._should_not_eval():
+            return tree
 
-    def assignment(self, items: List):
-        if self.func_counter:
-            return items
-        identifier, res = items
+        return float(cast(str, tree.children)[0])
+
+    @v_args(tree=True)
+    def assignment(self, tree: Tree):
+        if self._should_not_eval():
+            return tree
+
+        identifier, res = cast(List, tree.children)
         self.scope[-1][identifier] = {"type": "var", "value": res}
         return self.scope[-1][identifier]
 
-    def identifier(self, ident: List[Token]):
-        return ident[0].value
+    @v_args(tree=True)
+    def identifier(self, tree: Tree):
+        if self._should_not_eval():
+            return tree
 
-    def start_fn(self, tokens):
+        return cast(Token, tree.children[0]).value
+
+    @v_args(tree=True)
+    def existing_ident(self, tree: Tree):
+        if self._should_not_eval():
+            return tree
+
+        items = cast(List, tree.children)
+        ident = self._get_ident(items[0])
+        if not ident:
+            raise LikeSyntaxError(f"Unknown variable: {items[0]}")
+        return ident["value"]
+
+    def start_fn(self, _):
         self.func_counter += 1
 
-    def end_fn(self, tokens):
+    def end_fn(self, _):
         self.func_counter -= 1
 
-    def function(self, items: List):
-        _, name, args, body, _ = items
+    @v_args(tree=True)
+    def function(self, tree: Tree):
+        if self._should_not_eval():
+            return tree
+
+        name, args, _, body, _ = cast(List, tree.children)
         self.scope[-1][name] = {"type": "fn", "args": args, "body": body}
         return self.scope[-1][name]
 
-    def func_call(self, items: List):
-        name, args = items
-        print(self.scope)
+    @v_args(tree=True)
+    def func_call(self, tree: Tree):
+        if self._should_not_eval():
+            return tree
+
+        name, args = cast(List, tree.children)
         ident_scope = self._get_ident(name)
         if not ident_scope:
             raise LikeSyntaxError("function not found")
@@ -78,15 +112,40 @@ class LikeEvaluator(Transformer):
             raise LikeSyntaxError(
                 "expected: {} args, got only {}.".format(len(ident_scope), len(args))
             )
-        self.scope.append({arg: param for arg, param in zip(ident_scope["args"], args)})
+        self.scope.append(
+            {
+                param: {"value": arg, "type": "var"}
+                for param, arg in zip(ident_scope["args"], args)
+            }
+        )
         result = self.transform(ident_scope["body"])
         self.scope.pop()
+        print("result", result)
         return result
 
-    def args(self, items: List):
-        return items
+    @v_args(tree=True)
+    def params(self, tree: Tree):
+        return tree if self._should_not_eval() else tree.children
+
+    @v_args(tree=True)
+    def args(self, tree: Tree):
+        return tree if self._should_not_eval() else tree.children
+
+    @v_args(tree=True)
+    def block(self, tree: Tree):
+        if self._should_not_eval():
+            return tree
+
+        return tree.children[-1]
+
+    @v_args(tree=True)
+    def start(self, tree: Tree):
+        if self._should_not_eval():
+            return tree
+
+        return tree.children[-1]
 
     def _get_ident(self, ident: str):
-        for scope in self.scope:
+        for scope in reversed(self.scope):
             if ident in scope.keys():
                 return scope[ident]

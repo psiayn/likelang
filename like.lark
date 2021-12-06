@@ -3,8 +3,9 @@ start: statements+
 ?statements: function+
            | assignment+
            | func_call+
+           | expression
 
-function: "fn" start_fn identifier args "{" block "}" end_fn
+function: "fn" identifier params start_fn "{" block "}" end_fn
 
 start_fn: 
 
@@ -12,15 +13,19 @@ end_fn:
 
 func_call: identifier args
 
-args: "(" [ identifier ("," identifier)* ] ")"
+params: "(" [ identifier ("," identifier)* ] ")"
+
+args: "(" [ expression ("," expression)* ] ")"
 
 identifier: CNAME
+
+existing_ident: identifier
 
 block: statements+
 
 ?expression: expression operator expression
           | "(" expression ")"
-          | identifier
+          | existing_ident
           | NUMBER -> number
 
 operator: "+" -> add
