@@ -9,10 +9,10 @@ identifier: CNAME
 
 block: statements+
 
-expression: expression operator expression
+?expression: expression operator expression
           | "(" expression ")"
           | identifier
-          | NUMBER
+          | NUMBER -> number
 
 operator: "+" -> add
         | "-" -> sub
