@@ -2,7 +2,6 @@ start: statements+
 
 ?statements: function+
            | assignment+
-           | func_call+
            | expression
 
 function: "fn" identifier params start_fn "{" block "}" end_fn
@@ -27,6 +26,7 @@ block: statements+
           | "(" expression ")"
           | existing_ident
           | NUMBER -> number
+          | func_call
 
 operator: "+" -> add
         | "-" -> sub

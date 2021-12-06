@@ -82,11 +82,17 @@ class LikeEvaluator(Transformer):
             raise LikeSyntaxError(f"Unknown variable: {items[0]}")
         return ident["value"]
 
-    def start_fn(self, _):
+    @v_args(tree=True)
+    def start_fn(self, tree: Tree):
         self._func_counter += 1
 
-    def end_fn(self, _):
+        return tree if self._should_not_eval() else None
+
+    @v_args(tree=True)
+    def end_fn(self, tree: Tree):
         self._func_counter -= 1
+
+        return tree if self._should_not_eval() else None
 
     @v_args(tree=True)
     def function(self, tree: Tree):

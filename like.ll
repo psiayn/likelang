@@ -9,9 +9,10 @@ fn somefunc (a, b) {
         c
     }
 
-    let d = (b * (a + 30)) / 40
+    let d = (b * (a + 30)) / (somefunc2())
 
     d
+
 }
 
 somefunc(20, 30)
