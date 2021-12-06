@@ -116,7 +116,7 @@ class LikeEvaluator(Transformer):
             raise LikeSyntaxError("tried to call variable")
         elif len(ident_scope["args"]) != len(args):
             raise LikeSyntaxError(
-                "expected: {} args, got only {}.".format(len(ident_scope), len(args))
+                "expected: {} args, got {}.".format(len(ident_scope["args"]), len(args))
             )
         self._scopes.append(
             {
