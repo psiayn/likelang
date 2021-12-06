@@ -1,0 +1,20 @@
+start: statements+
+
+statements: function
+			| assignment+
+
+function: "fn" identifier "{" block "}"
+
+identifier: STRING
+
+block: statements+
+
+expression:   expression "+" expression
+			| expression "-" expression
+			| expression "*" expression
+			| expression "/" expression
+			| identifier
+
+assignment: "let" identifier "=" expression
+
+%import common.STRING
