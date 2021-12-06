@@ -2,9 +2,15 @@ start: statements+
 
 ?statements: function+
            | assignment+
-           | identifier args
+           | func_call+
 
-function: "fn" identifier args "{" block "}"
+function: "fn" start_fn identifier args "{" block "}" end_fn
+
+start_fn: 
+
+end_fn: 
+
+func_call: identifier args
 
 args: "(" [ identifier ("," identifier)* ] ")"
 
