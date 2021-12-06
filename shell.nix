@@ -6,5 +6,6 @@ let
 in mkShell {
   packages = [
     pythonEnv
+    black
   ];
 }

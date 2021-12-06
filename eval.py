@@ -9,7 +9,6 @@ class LikeSyntaxError(Exception):
 
 
 class LikeEvaluator(Transformer):
-
     def __init__(self):
         self.scope: List[Dict[str, Any]] = [{}]
         self.func_counter: int = 0
@@ -50,7 +49,7 @@ class LikeEvaluator(Transformer):
         if self.func_counter:
             return items
         identifier, res = items
-        self.scope[-1][identifier] = {'type': 'var', 'value': res}
+        self.scope[-1][identifier] = {"type": "var", "value": res}
         return self.scope[-1][identifier]
 
     def identifier(self, ident: List[Token]):
@@ -64,7 +63,7 @@ class LikeEvaluator(Transformer):
 
     def function(self, items: List):
         _, name, args, body, _ = items
-        self.scope[-1][name] = {'type': 'fn', 'args': args, 'body': body}
+        self.scope[-1][name] = {"type": "fn", "args": args, "body": body}
         return self.scope[-1][name]
 
     def func_call(self, items: List):
@@ -73,9 +72,16 @@ class LikeEvaluator(Transformer):
         ident_scope = self._get_ident(name)
         if not ident_scope:
             raise LikeSyntaxError("function not found")
-        elif ident_scope['type'] != 'fn':
+        elif ident_scope["type"] != "fn":
             raise LikeSyntaxError("tried to call variable")
-        return items
+        elif len(ident_scope["args"]) != len(args):
+            raise LikeSyntaxError(
+                "expected: {} args, got only {}.".format(len(ident_scope), len(args))
+            )
+        self.scope.append({arg: param for arg, param in zip(ident_scope["args"], args)})
+        result = self.transform(ident_scope["body"])
+        self.scope.pop()
+        return result
 
     def args(self, items: List):
         return items
