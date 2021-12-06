@@ -1,20 +1,27 @@
 start: statements+
 
-statements: function
-			| assignment+
+?statements: function+
+           | assignment+
 
 function: "fn" identifier "{" block "}"
 
-identifier: STRING
+identifier: CNAME
 
 block: statements+
 
-expression:   expression "+" expression
-			| expression "-" expression
-			| expression "*" expression
-			| expression "/" expression
-			| identifier
+expression: expression operator expression
+          | "(" expression ")"
+          | identifier
+          | NUMBER
+
+operator: "+" -> add
+        | "-" -> sub
+        | "*" -> mul
+        | "/" -> div
 
 assignment: "let" identifier "=" expression
 
-%import common.STRING
+%import common.CNAME
+%import common.NUMBER
+%import common.WS
+%ignore WS
