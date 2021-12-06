@@ -2,8 +2,11 @@ start: statements+
 
 ?statements: function+
            | assignment+
+           | identifier args
 
-function: "fn" identifier "{" block "}"
+function: "fn" identifier args "{" block "}"
+
+args: "(" [ identifier ("," identifier)* ] ")"
 
 identifier: CNAME
 
