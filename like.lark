@@ -29,6 +29,7 @@ block: statements*
           | "(" expression ")"
           | existing_ident
           | NUMBER -> number
+          | collect_call
           | func_call
           | ESCAPED_STRING -> string
 

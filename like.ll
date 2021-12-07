@@ -25,11 +25,11 @@ fn somefunc3() {
 }
 
 fn somefunc_abc() {
-    
+    "hello from somefunc_abc()!"
 }
 
 fn sometest() {
-    "i will yeet you"
+   "hello from sometest()!"
 }
 
 fn some() {
@@ -40,16 +40,16 @@ fn func() {
     print("running 'func' fun")
 }
 
-print(somefunc(20, 30))
+// print(somefunc(20, 30))
 
-let post = collect /*func/
-let pre = collect /some*/
-print("Printing collected functions:", post)
-print("Printing collected functions:", pre)
-pre()
-post()
-sometest()
-// sf() -> somefunc()
-// sf.3() -> somefunc3()
-// sf._abc() -> somefunc_abc()
-// sometest()
+let func = collect /*func/
+let some = collect /some*/
+print("Printing collected functions:", func)
+print("Printing collected functions:", some)
+print(some.test())
+print(some.func_abc())
+// random.func()
+print(sometest())
+
+some()
+func()

@@ -10,6 +10,6 @@ with open("like.ll") as f:
 
 ast = lark_parser.parse(lark_lang)
 
-print(ast.pretty())
+# print(ast.pretty())
 
 res = LikeEvaluator().transform(ast)
