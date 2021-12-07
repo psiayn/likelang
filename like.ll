@@ -32,13 +32,22 @@ fn sometest() {
     "i will yeet you"
 }
 
+fn some() {
+    print("running 'some' fun")
+}
+
+fn func() {
+    print("running 'func' fun")
+}
+
 print(somefunc(20, 30))
 
 let post = collect /*func/
 let pre = collect /some*/
 print("Printing collected functions:", post)
 print("Printing collected functions:", pre)
-// post()
+pre()
+post()
 sometest()
 // sf() -> somefunc()
 // sf.3() -> somefunc3()

@@ -32,5 +32,5 @@ class Collect:
     def __repr__(self) -> str:
 
         return "Collect<{} - {}>".format(
-            self.type, ", ".join([f[0] for f in self.value])
+            self.type, ", ".join(["'" + f[0] + "'" for f in self.value])
         )

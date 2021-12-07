@@ -133,7 +133,14 @@ class LikeEvaluator(Transformer):
         elif isinstance(ident_scope, like_types.Variable):
             raise LikeSyntaxError("tried to call variable")
         elif isinstance(ident_scope, like_types.Collect):
-            return
+            funs = [fun for name, fun in ident_scope.value if name == ""]
+
+            if not funs:
+                raise LikeSyntaxError("Function not found")
+            if len(funs) > 1:
+                raise LikeSyntaxError("Too many functions found aaa")
+
+            ident_scope = funs[0]
         elif len(ident_scope.args) != len(args):
             raise LikeSyntaxError(
                 "expected: {} args, got {}.".format(len(ident_scope.args), len(args))
@@ -200,7 +207,7 @@ class LikeEvaluator(Transformer):
                 return fun[0].endswith(pattern[1:])
 
             def extract_func(fun):
-                return fun[0][: len(pattern[:-1])]
+                return fun[0][: -len(pattern[1:])]
 
         else:
             raise LikeSyntaxError("Invalid pattern. Use a * at the beginning or end.")
