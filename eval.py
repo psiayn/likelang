@@ -131,7 +131,10 @@ class LikeEvaluator(Transformer):
         if not ident_scope:
             raise LikeSyntaxError("function not found")
         elif isinstance(ident_scope, like_types.Variable):
-            raise LikeSyntaxError("tried to call variable")
+            if isinstance(ident_scope.value, like_types.Function):
+                ident_scope = ident_scope.value
+            else:
+                raise LikeSyntaxError("tried to call variable")
         elif isinstance(ident_scope, like_types.Collect):
             funs = [fun for name, fun in ident_scope.value if name == ""]
 

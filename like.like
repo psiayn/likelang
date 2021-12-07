@@ -53,3 +53,10 @@ print(sometest())
 
 some()
 func()
+
+fn qwerty(num) {
+    print("func var", num)
+}
+
+let funcVar = qwerty
+funcVar(100)
