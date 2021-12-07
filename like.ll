@@ -48,7 +48,7 @@ print("Printing collected functions:", func)
 print("Printing collected functions:", some)
 print(some.test())
 print(some.func_abc())
-// random.func()
+random.func()
 print(sometest())
 
 some()
