@@ -32,6 +32,14 @@ fn sometest() {
    "hello from sometest()!"
 }
 
+fn some() {
+    print("running 'some' fun")
+}
+
+fn func() {
+    print("running 'func' fun")
+}
+
 // print(somefunc(20, 30))
 
 let func = collect /*func/
@@ -40,5 +48,8 @@ print("Printing collected functions:", func)
 print("Printing collected functions:", some)
 print(some.test())
 print(some.func_abc())
-// random.func()
+random.func()
 print(sometest())
+
+some()
+func()
