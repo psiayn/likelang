@@ -1,6 +1,5 @@
-from typing import Any, Dict, List, Tuple, cast
-
 import re
+from typing import Any, Dict, List, Tuple, cast
 
 from lark import Transformer
 from lark.lexer import Token
@@ -180,14 +179,41 @@ class LikeEvaluator(Transformer):
     def collect(self, tree: Tree):
         if self._should_not_eval():
             return tree
+
         identifier, pattern = cast(List, tree.children)
         pattern = pattern.strip("/")
         functions = self._get_functions()
-        function_pattern = re.compile(pattern)
-        matching_functions = list(
-            filter(lambda function: function_pattern.fullmatch(function[0]), functions)
+
+        if pattern[-1] == "*":
+            pattern_type = "prefix"
+
+            def filter_func(fun):
+                return fun[0].startswith(pattern[:-1])
+
+            def extract_func(fun):
+                return fun[0][len(pattern[:-1]) :]
+
+        elif pattern[0] == "*":
+            pattern_type = "postfix"
+
+            def filter_func(fun):
+                return fun[0].endswith(pattern[1:])
+
+            def extract_func(fun):
+                return fun[0][: len(pattern[:-1])]
+
+        else:
+            raise LikeSyntaxError("Invalid pattern. Use a * at the beginning or end.")
+
+        matching_functions = list(filter(filter_func, functions))
+        fun_names = list(map(extract_func, matching_functions))
+        _collect = like_types.Collect(
+            [
+                (fun_name, fun)
+                for fun_name, (_, fun) in zip(fun_names, matching_functions)
+            ],
+            pattern_type,
         )
-        _collect = like_types.Collect(matching_functions)
         self._scopes[-1][identifier] = _collect
         return _collect
 

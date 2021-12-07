@@ -13,6 +13,7 @@ class Variable:
     def __str__(self) -> str:
         return str(self.value)
 
+
 @dataclass
 class Function:
     name: str
@@ -26,6 +27,10 @@ class Function:
 @dataclass
 class Collect:
     value: Any
+    type: str
 
     def __repr__(self) -> str:
-        return "Collect<{}>".format(", ".join([f[0] for f in self.value]))
+
+        return "Collect<{} - {}>".format(
+            self.type, ", ".join([f[0] for f in self.value])
+        )

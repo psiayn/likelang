@@ -34,9 +34,11 @@ fn sometest() {
 
 print(somefunc(20, 30))
 
-let sf = collect /.*func/
-print("Printing collected functions:", sf)
-sf()
+let post = collect /*func/
+let pre = collect /some*/
+print("Printing collected functions:", post)
+print("Printing collected functions:", pre)
+// post()
 sometest()
 // sf() -> somefunc()
 // sf.3() -> somefunc3()
