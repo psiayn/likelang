@@ -1,4 +1,6 @@
-from typing import Any, Dict, List, cast
+from typing import Any, Dict, List, Tuple, cast
+
+import re
 
 from lark import Transformer
 from lark.lexer import Token
@@ -158,3 +160,27 @@ class LikeEvaluator(Transformer):
         for scope in reversed(self._scopes):
             if ident in scope.keys():
                 return scope[ident]
+
+    @v_args(tree=True)
+    def collect(self, tree: Tree):
+        if self._should_not_eval():
+            return tree
+        identifier, pattern = cast(List, tree.children)
+        pattern = pattern.strip('/')
+        print(identifier)
+        print(pattern)
+        functions = self._get_functions()
+        print([f[0] for f in functions])
+        function_pattern = re.compile(pattern)
+        matching_functions = list(filter(lambda function: function_pattern.match(function[0]), functions))
+        print([f[0] for f in matching_functions])
+        self._scopes[-1][identifier] = {'type': 'collect', 'value': matching_functions}
+        return self._scopes[-1][identifier]
+
+    def _get_functions(self) -> List[Tuple[str, Any]]:
+        function = []
+        for scope in self._scopes:
+            for (key, value) in scope.items():
+                if value['type'] == 'fn':
+                    function.append((key, value))
+        return function

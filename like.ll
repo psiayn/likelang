@@ -14,4 +14,21 @@ fn somefunc (a, b) {
     d
 }
 
+fn randomfunc () {
+    let a = 12
+    print(a)
+}
+
+fn somefunc3() {
+    let a = 10
+    print(a)
+}
+
+fn somefunc_abc() {
+    
+}
+
 print(somefunc(20, 30))
+
+let sf = collect /somefunc/
+print(sf)

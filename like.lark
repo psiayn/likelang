@@ -3,6 +3,7 @@ start: statements+
 ?statements: function+
            | assignment+
            | expression
+           | collect+
 
 function: "fn" identifier params start_fn "{" block "}" end_fn
 
@@ -20,7 +21,7 @@ identifier: CNAME
 
 existing_ident: identifier
 
-block: statements+
+block: statements*
 
 ?expression: expression operator expression
           | "(" expression ")"
@@ -35,7 +36,12 @@ operator: "+" -> add
 
 assignment: "let" identifier "=" expression
 
+collect: "let" identifier "=" "collect" PATTERN
+
+PATTERN: "/" _STRING_ESC_INNER "/"
+
 %import common.CNAME
 %import common.NUMBER
 %import common.WS
+%import common._STRING_ESC_INNER
 %ignore WS
