@@ -10,9 +10,8 @@ fn somefunc (a, b) {
     }
 
     let d = (b * (a + 30)) / (somefunc2())
-
+    print(d, d)
     d
-
 }
 
-somefunc(20, 30)
+print(somefunc(20, 30))

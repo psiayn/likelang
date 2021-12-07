@@ -13,5 +13,3 @@ ast = lark_parser.parse(lark_lang)
 print(ast.pretty())
 
 res = LikeEvaluator().transform(ast)
-
-print(res)

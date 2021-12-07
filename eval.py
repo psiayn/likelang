@@ -109,6 +109,10 @@ class LikeEvaluator(Transformer):
             return tree
 
         name, args = cast(List, tree.children)
+        if name == "print":
+            print(*args)
+            return None
+
         ident_scope = self._get_ident(name)
         if not ident_scope:
             raise LikeSyntaxError("function not found")
@@ -126,7 +130,6 @@ class LikeEvaluator(Transformer):
         )
         result = self.transform(ident_scope["body"])
         self._scopes.pop()
-        print("result", result)
         return result
 
     @v_args(tree=True)

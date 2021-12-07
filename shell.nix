@@ -7,5 +7,6 @@ in mkShell {
   packages = [
     pythonEnv
     black
+    nodejs
   ];
 }
