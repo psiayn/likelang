@@ -9,6 +9,7 @@ from lark.visitors import v_args
 
 import like_types
 
+
 class LikeSyntaxError(Exception):
     pass
 
@@ -57,11 +58,12 @@ class LikeEvaluator(Transformer):
             return tree
 
         return float(cast(str, tree.children)[0])
+
     @v_args(tree=True)
     def string(self, tree: Tree):
         if self._should_not_eval():
             return tree
-        return cast(str, tree.children)[0].strip("\"")
+        return cast(str, tree.children)[0].strip('"')
 
     @v_args(tree=True)
     def assignment(self, tree: Tree):
@@ -174,10 +176,12 @@ class LikeEvaluator(Transformer):
         if self._should_not_eval():
             return tree
         identifier, pattern = cast(List, tree.children)
-        pattern = pattern.strip('/')
+        pattern = pattern.strip("/")
         functions = self._get_functions()
         function_pattern = re.compile(pattern)
-        matching_functions = list(filter(lambda function: function_pattern.match(function[0]), functions))
+        matching_functions = list(
+            filter(lambda function: function_pattern.match(function[0]), functions)
+        )
         collect = like_types.Collect(matching_functions)
         self._scopes[-1][identifier] = collect
         return collect
