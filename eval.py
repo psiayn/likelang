@@ -32,7 +32,10 @@ class LikeEvaluator(Transformer):
         if len(items) == 3:
             op1, operator, op2 = items
             operator: Tree
-
+            if isinstance(op1, like_types.Variable):
+                op1 = op1.value
+            if isinstance(op2, like_types.Variable):
+                op2 = op2.value
             if operator.data == "add":
                 return op1 + op2
             elif operator.data == "sub":
@@ -91,7 +94,7 @@ class LikeEvaluator(Transformer):
         ident = self._get_ident(items[0])
         if not ident:
             raise LikeSyntaxError(f"Unknown variable: {items[0]}")
-        return ident.value
+        return ident
 
     @v_args(tree=True)
     def start_fn(self, tree: Tree):
@@ -130,6 +133,8 @@ class LikeEvaluator(Transformer):
             raise LikeSyntaxError("function not found")
         elif isinstance(ident_scope, like_types.Variable):
             raise LikeSyntaxError("tried to call variable")
+        elif isinstance(ident_scope, like_types.Collect):
+            return
         elif len(ident_scope.args) != len(args):
             raise LikeSyntaxError(
                 "expected: {} args, got {}.".format(len(ident_scope.args), len(args))
@@ -180,11 +185,11 @@ class LikeEvaluator(Transformer):
         functions = self._get_functions()
         function_pattern = re.compile(pattern)
         matching_functions = list(
-            filter(lambda function: function_pattern.match(function[0]), functions)
+            filter(lambda function: function_pattern.fullmatch(function[0]), functions)
         )
-        collect = like_types.Collect(matching_functions)
-        self._scopes[-1][identifier] = collect
-        return collect
+        _collect = like_types.Collect(matching_functions)
+        self._scopes[-1][identifier] = _collect
+        return _collect
 
     def _get_functions(self) -> List[Tuple[str, Any]]:
         function = []

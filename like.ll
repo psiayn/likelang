@@ -28,10 +28,17 @@ fn somefunc_abc() {
     
 }
 
+fn sometest() {
+    "i will yeet you"
+}
+
 print(somefunc(20, 30))
 
-let sf = collect /somefunc/
+let sf = collect /.*func/
 print("Printing collected functions:", sf)
+sf()
+sometest()
 // sf() -> somefunc()
 // sf.3() -> somefunc3()
 // sf._abc() -> somefunc_abc()
+// sometest()

@@ -13,6 +13,8 @@ end_fn:
 
 func_call: identifier args
 
+collect_call: identifier "." identifier args
+
 params: "(" [ identifier ("," identifier)* ] ")"
 
 args: "(" [ expression ("," expression)* ] ")"
