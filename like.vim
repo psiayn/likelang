@@ -3,9 +3,9 @@
 " Maintainer: Samyak S Sarnayak
 " Latest Revision: 07 December 2021
 
-" if exists("b:current_syntax")
-"   finish
-" endif
+if exists("b:current_syntax")
+  finish
+endif
 
 " Keywords
 syn keyword likeKeywords fn nextgroup=likeFunName print let nextgroup=likeVar collect nextgroup=likePrefixPattern,likePostfixPattern
