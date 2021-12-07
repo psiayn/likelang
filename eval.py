@@ -224,3 +224,68 @@ class LikeEvaluator(Transformer):
                 if isinstance(value, like_types.Function):
                     function.append((key, value))
         return function
+
+    @v_args(tree=True)
+    def collect_call(self, tree: Tree):
+        # do not evaluate until execution is reached
+        if self._should_not_eval():
+            return tree
+
+        # destructuring the tree
+        prefix, postfix, args = cast(List, tree.children)
+
+        # checking if prefix exists
+        pref_scope = self._get_ident(prefix)
+        if isinstance(pref_scope, like_types.Collect):
+            # getting functions that match the postfix
+            matching_function = list(filter(lambda x: x[0] == postfix, cast(List[Tuple], pref_scope.value)))
+
+            # checking if no funtions match
+            if len(matching_function) < 1:
+                raise LikeSyntaxError("Tried to call invalid function")
+
+            # checking if more than function matches
+            if len(matching_function) > 1:
+                raise LikeSyntaxError("Ambiguous function call")
+
+            # storing the matching function
+            function = matching_function[0][1]
+        else:
+            # check if postfix exists
+            post_scope = self._get_ident(postfix)
+            if isinstance(post_scope, like_types.Collect):
+                # getting functions that match the prefix
+                matching_function = list(filter(lambda x: x[0] == prefix, cast(List[Tuple], post_scope.value)))
+
+                # checking if no functions match
+                if len(matching_function) < 1:
+                    raise LikeSyntaxError("Tried to call invalid function")
+
+                # checking if multiple functions match
+                if len(matching_function) > 1:
+                    raise LikeSyntaxError("Ambiguous function call")
+
+                # storing the matching function
+                function = matching_function[0][1]
+            else:
+                raise LikeSyntaxError("Trying to use collect on no collect types")
+
+        # check if args match
+        if len(function.args) != len(args):
+            raise LikeSyntaxError(
+                "expected: {} args, got {}.".format(len(function.args), len(args))
+            )
+
+        # create a new scope with args
+        self._scopes.append(
+            {
+                param: like_types.Variable(param, arg)
+                for param, arg in zip(function.args, args)
+            }
+        )
+
+        # get the result of the function and pop the scope
+        result = self.transform(function.value)
+        self._scopes.pop()
+
+        return result
