@@ -15,7 +15,7 @@ fn somefunc (a, b) {
 }
 
 fn randomfunc () {
-    let a = 12
+    let a = "AAAAAAAAAAAAAAAA"
     print(a)
 }
 
@@ -31,4 +31,7 @@ fn somefunc_abc() {
 print(somefunc(20, 30))
 
 let sf = collect /somefunc/
-print(sf)
+print("Printing collected functions:", sf)
+// sf() -> somefunc()
+// sf.3() -> somefunc3()
+// sf._abc() -> somefunc_abc()

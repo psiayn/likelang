@@ -7,6 +7,7 @@ from lark.lexer import Token
 from lark.tree import Tree
 from lark.visitors import v_args
 
+import like_types
 
 class LikeSyntaxError(Exception):
     pass
@@ -56,6 +57,11 @@ class LikeEvaluator(Transformer):
             return tree
 
         return float(cast(str, tree.children)[0])
+    @v_args(tree=True)
+    def string(self, tree: Tree):
+        if self._should_not_eval():
+            return tree
+        return cast(str, tree.children)[0].strip("\"")
 
     @v_args(tree=True)
     def assignment(self, tree: Tree):
@@ -63,8 +69,9 @@ class LikeEvaluator(Transformer):
             return tree
 
         identifier, res = cast(List, tree.children)
-        self._scopes[-1][identifier] = {"type": "var", "value": res}
-        return self._scopes[-1][identifier]
+        var = like_types.Variable(identifier, res)
+        self._scopes[-1][identifier] = var
+        return var
 
     @v_args(tree=True)
     def identifier(self, tree: Tree):
@@ -82,7 +89,7 @@ class LikeEvaluator(Transformer):
         ident = self._get_ident(items[0])
         if not ident:
             raise LikeSyntaxError(f"Unknown variable: {items[0]}")
-        return ident["value"]
+        return ident.value
 
     @v_args(tree=True)
     def start_fn(self, tree: Tree):
@@ -102,8 +109,9 @@ class LikeEvaluator(Transformer):
             return tree
 
         name, args, _, body, _ = cast(List, tree.children)
-        self._scopes[-1][name] = {"type": "fn", "args": args, "body": body}
-        return self._scopes[-1][name]
+        func = like_types.Function(name, args, body)
+        self._scopes[-1][name] = func
+        return func
 
     @v_args(tree=True)
     def func_call(self, tree: Tree):
@@ -118,19 +126,19 @@ class LikeEvaluator(Transformer):
         ident_scope = self._get_ident(name)
         if not ident_scope:
             raise LikeSyntaxError("function not found")
-        elif ident_scope["type"] != "fn":
+        elif isinstance(ident_scope, like_types.Variable):
             raise LikeSyntaxError("tried to call variable")
-        elif len(ident_scope["args"]) != len(args):
+        elif len(ident_scope.args) != len(args):
             raise LikeSyntaxError(
-                "expected: {} args, got {}.".format(len(ident_scope["args"]), len(args))
+                "expected: {} args, got {}.".format(len(ident_scope.args), len(args))
             )
         self._scopes.append(
             {
-                param: {"value": arg, "type": "var"}
-                for param, arg in zip(ident_scope["args"], args)
+                param: like_types.Variable(param, arg)
+                for param, arg in zip(ident_scope.args, args)
             }
         )
-        result = self.transform(ident_scope["body"])
+        result = self.transform(ident_scope.value)
         self._scopes.pop()
         return result
 
@@ -167,20 +175,17 @@ class LikeEvaluator(Transformer):
             return tree
         identifier, pattern = cast(List, tree.children)
         pattern = pattern.strip('/')
-        print(identifier)
-        print(pattern)
         functions = self._get_functions()
-        print([f[0] for f in functions])
         function_pattern = re.compile(pattern)
         matching_functions = list(filter(lambda function: function_pattern.match(function[0]), functions))
-        print([f[0] for f in matching_functions])
-        self._scopes[-1][identifier] = {'type': 'collect', 'value': matching_functions}
-        return self._scopes[-1][identifier]
+        collect = like_types.Collect(matching_functions)
+        self._scopes[-1][identifier] = collect
+        return collect
 
     def _get_functions(self) -> List[Tuple[str, Any]]:
         function = []
         for scope in self._scopes:
             for (key, value) in scope.items():
-                if value['type'] == 'fn':
+                if isinstance(value, like_types.Function):
                     function.append((key, value))
         return function

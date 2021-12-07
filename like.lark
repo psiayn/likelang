@@ -28,6 +28,7 @@ block: statements*
           | existing_ident
           | NUMBER -> number
           | func_call
+          | ESCAPED_STRING -> string
 
 operator: "+" -> add
         | "-" -> sub
@@ -44,4 +45,7 @@ PATTERN: "/" _STRING_ESC_INNER "/"
 %import common.NUMBER
 %import common.WS
 %import common._STRING_ESC_INNER
+%import common.ESCAPED_STRING
+%import common.CPP_COMMENT
 %ignore WS
+%ignore CPP_COMMENT
