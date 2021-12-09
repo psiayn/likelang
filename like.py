@@ -1,6 +1,6 @@
 from lark import Lark
 
-from eval import LikeEvaluator, LikeSyntaxError
+from like.eval import LikeEvaluator, LikeSyntaxError
 
 import sys
 

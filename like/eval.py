@@ -1,4 +1,3 @@
-import re
 from typing import Any, Dict, List, Tuple, cast
 
 from lark import Transformer
@@ -6,7 +5,7 @@ from lark.lexer import Token
 from lark.tree import Tree
 from lark.visitors import v_args
 
-import like_types
+from like.types import Variable, Collect, Function
 
 
 class LikeSyntaxError(Exception):
@@ -30,9 +29,9 @@ class LikeEvaluator(Transformer):
         if len(items) == 3:
             op1, operator, op2 = items
             operator: Tree
-            if isinstance(op1, like_types.Variable):
+            if isinstance(op1, Variable):
                 op1 = op1.value
-            if isinstance(op2, like_types.Variable):
+            if isinstance(op2, Variable):
                 op2 = op2.value
             if operator.data == "add":
                 return op1 + op2
@@ -72,7 +71,7 @@ class LikeEvaluator(Transformer):
             return tree
 
         identifier, res = cast(List, tree.children)
-        var = like_types.Variable(identifier, res)
+        var = Variable(identifier, res)
         self._scopes[-1][identifier] = var
         return var
 
@@ -112,7 +111,7 @@ class LikeEvaluator(Transformer):
             return tree
 
         name, args, _, body, _ = cast(List, tree.children)
-        func = like_types.Function(name, args, body)
+        func = Function(name, args, body)
         self._scopes[-1][name] = func
         return func
 
@@ -126,11 +125,11 @@ class LikeEvaluator(Transformer):
             args = list(
                 map(
                     lambda x: "false"
-                    if isinstance(x, like_types.Variable) and x.value is False
+                    if isinstance(x, Variable) and x.value is False
                     else x,
                     map(
                         lambda x: "true"
-                        if isinstance(x, like_types.Variable) and x.value is True
+                        if isinstance(x, Variable) and x.value is True
                         else x,
                         args,
                     ),
@@ -148,12 +147,12 @@ class LikeEvaluator(Transformer):
         ident_scope = self._get_ident(name)
         if not ident_scope:
             raise LikeSyntaxError("function not found")
-        elif isinstance(ident_scope, like_types.Variable):
-            if isinstance(ident_scope.value, like_types.Function):
+        elif isinstance(ident_scope, Variable):
+            if isinstance(ident_scope.value, Function):
                 ident_scope = ident_scope.value
             else:
                 raise LikeSyntaxError("tried to call variable")
-        elif isinstance(ident_scope, like_types.Collect):
+        elif isinstance(ident_scope, Collect):
             funs = [fun for name, fun in ident_scope.value if name == ""]
 
             if not funs:
@@ -169,8 +168,8 @@ class LikeEvaluator(Transformer):
         self._scopes.append(
             {
                 param: arg
-                if isinstance(arg, like_types.Variable)
-                else like_types.Variable(param, arg)
+                if isinstance(arg, Variable)
+                else Variable(param, arg)
                 for param, arg in zip(ident_scope.args, args)
             }
         )
@@ -237,7 +236,7 @@ class LikeEvaluator(Transformer):
 
         matching_functions = list(filter(filter_func, functions))
         fun_names = list(map(extract_func, matching_functions))
-        _collect = like_types.Collect(
+        _collect = Collect(
             [
                 (fun_name, fun)
                 for fun_name, (_, fun) in zip(fun_names, matching_functions)
@@ -251,7 +250,7 @@ class LikeEvaluator(Transformer):
         function = []
         for scope in self._scopes:
             for (key, value) in scope.items():
-                if isinstance(value, like_types.Function):
+                if isinstance(value, Function):
                     function.append((key, value))
         return function
 
@@ -266,7 +265,7 @@ class LikeEvaluator(Transformer):
 
         # checking if prefix exists
         pref_scope = self._get_ident(prefix)
-        if isinstance(pref_scope, like_types.Collect):
+        if isinstance(pref_scope, Collect):
             # getting functions that match the postfix
             matching_function = list(
                 filter(lambda x: x[0] == postfix, cast(List[Tuple], pref_scope.value))
@@ -285,7 +284,7 @@ class LikeEvaluator(Transformer):
         else:
             # check if postfix exists
             post_scope = self._get_ident(postfix)
-            if isinstance(post_scope, like_types.Collect):
+            if isinstance(post_scope, Collect):
                 # getting functions that match the prefix
                 matching_function = list(
                     filter(
@@ -315,7 +314,7 @@ class LikeEvaluator(Transformer):
         # create a new scope with args
         self._scopes.append(
             {
-                param: like_types.Variable(param, arg)
+                param: Variable(param, arg)
                 for param, arg in zip(function.args, args)
             }
         )
@@ -355,9 +354,9 @@ class LikeEvaluator(Transformer):
         if len(items) == 3:
             op1, operator, op2 = items
             operator: Tree
-            if isinstance(op1, like_types.Variable):
+            if isinstance(op1, Variable):
                 op1 = op1.value
-            if isinstance(op2, like_types.Variable):
+            if isinstance(op2, Variable):
                 op2 = op2.value
 
             if operator.data == "eq":
