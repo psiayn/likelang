@@ -30,6 +30,9 @@ def get_context(u: UnexpectedInput, text: str):
     if start == -1:
         start += 1
 
+    if text[start] == "\n":
+        start += 1
+
     end = pos
 
     while end < len(text):
