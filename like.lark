@@ -4,6 +4,7 @@ start: statements+
            | assignment+
            | expression
            | collect+
+           | control_statements+
 
 function: "fn" identifier params start_fn "{" block "}" end_fn
 
@@ -27,16 +28,34 @@ block: statements*
 
 ?expression: expression operator expression
           | "(" expression ")"
+          | boolean
           | existing_ident
           | NUMBER -> number
           | collect_call
           | func_call
           | ESCAPED_STRING -> string
 
+?conditional: expression conditional_operator expression
+            | "!" expression
+            | boolean
+
 operator: "+" -> add
         | "-" -> sub
         | "*" -> mul
         | "/" -> div
+
+conditional_operator: "==" -> eq
+        | ">" -> gt
+        | "<" -> lt
+        | ">=" -> gte
+        | "<=" -> lte
+        | "!=" -> ne
+
+control_statements: "if" conditional "{" block "}"
+                | "if" conditional "{" block "}" "else" "{" block "}"
+
+boolean: "true" -> true
+        | "false" -> false
 
 assignment: "let" identifier "=" expression
 

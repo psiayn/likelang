@@ -42,21 +42,23 @@ fn func() {
 
 // print(somefunc(20, 30))
 
-let func = collect /*func/
-let some = collect /some*/
-print("Printing collected functions:", func)
-print("Printing collected functions:", some)
-print(some.test())
-print(some.func_abc())
-random.func()
-print(sometest())
+// let func = collect /*func/
+// let some = collect /some*/
+// print("Printing collected functions:", func)
+// print("Printing collected functions:", some)
+// print(some.test())
+// print(some.func_abc())
+// random.func()
+// print(sometest())
 
-some()
-func()
+// some()
+// func()
 
-fn qwerty(num) {
-    print("func var", num)
-}
+// fn qwerty(num) {
+//    print("func var", num)
+// }
 
-let funcVar = qwerty
-funcVar(100)
+// let funcVar = qwerty
+// funcVar(100)
+let a = true
+print(a)

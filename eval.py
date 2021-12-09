@@ -299,3 +299,18 @@ class LikeEvaluator(Transformer):
         self._scopes.pop()
 
         return result
+    
+    @v_args(tree=True)
+    def true(self, tree: Tree):
+        # do not evaluate until execution is reached
+        if self._should_not_eval():
+            return tree
+        return True
+
+    @v_args(tree=True)
+    def false(self, tree: Tree):
+        # do not evaluate until execution is reached
+        if self._should_not_eval():
+            return tree
+        return False
+
