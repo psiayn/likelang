@@ -248,7 +248,9 @@ class LikeEvaluator(Transformer):
         pref_scope = self._get_ident(prefix)
         if isinstance(pref_scope, like_types.Collect):
             # getting functions that match the postfix
-            matching_function = list(filter(lambda x: x[0] == postfix, cast(List[Tuple], pref_scope.value)))
+            matching_function = list(
+                filter(lambda x: x[0] == postfix, cast(List[Tuple], pref_scope.value))
+            )
 
             # checking if no funtions match
             if len(matching_function) < 1:
@@ -265,7 +267,11 @@ class LikeEvaluator(Transformer):
             post_scope = self._get_ident(postfix)
             if isinstance(post_scope, like_types.Collect):
                 # getting functions that match the prefix
-                matching_function = list(filter(lambda x: x[0] == prefix, cast(List[Tuple], post_scope.value)))
+                matching_function = list(
+                    filter(
+                        lambda x: x[0] == prefix, cast(List[Tuple], post_scope.value)
+                    )
+                )
 
                 # checking if no functions match
                 if len(matching_function) < 1:
@@ -299,7 +305,7 @@ class LikeEvaluator(Transformer):
         self._scopes.pop()
 
         return result
-    
+
     @v_args(tree=True)
     def true(self, tree: Tree):
         # do not evaluate until execution is reached
@@ -313,4 +319,3 @@ class LikeEvaluator(Transformer):
         if self._should_not_eval():
             return tree
         return False
-
