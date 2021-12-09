@@ -124,6 +124,19 @@ class LikeEvaluator(Transformer):
 
         name, args = cast(List, tree.children)
         if name == "print":
+            args = list(
+                map(
+                    lambda x: "false"
+                    if isinstance(x, like_types.Variable) and x.value is False
+                    else x,
+                    map(
+                        lambda x: "true"
+                        if isinstance(x, like_types.Variable) and x.value is True
+                        else x,
+                        args,
+                    ),
+                )
+            )
             print(*args)
             return None
 
@@ -150,7 +163,9 @@ class LikeEvaluator(Transformer):
             )
         self._scopes.append(
             {
-                param: like_types.Variable(param, arg)
+                param: arg
+                if isinstance(arg, like_types.Variable)
+                else like_types.Variable(param, arg)
                 for param, arg in zip(ident_scope.args, args)
             }
         )
@@ -319,3 +334,77 @@ class LikeEvaluator(Transformer):
         if self._should_not_eval():
             return tree
         return False
+
+    @v_args(tree=True)
+    def conditional(self, tree: Tree):
+        # do not evaluate until execution is reached
+        if self._should_not_eval():
+            return tree
+
+        items = cast(List, tree.children)
+
+        if len(items) == 1:
+            return items[0]
+        if len(items) == 2:
+            return not items[1]
+        if len(items) == 3:
+            op1, operator, op2 = items
+            operator: Tree
+            if isinstance(op1, like_types.Variable):
+                op1 = op1.value
+            if isinstance(op2, like_types.Variable):
+                op2 = op2.value
+
+            if operator.data == "eq":
+                return op1 == op2
+            if operator.data == "lt":
+                return op1 < op2
+            if operator.data == "gt":
+                return op1 > op2
+            if operator.data == "lte":
+                return op1 <= op2
+            if operator.data == "gte":
+                return op1 >= op2
+            else:
+                raise LikeSyntaxError(f"Unknown operator: {operator.data}")
+
+        raise LikeSyntaxError("Invalid conditional")
+
+    @v_args(tree=True)
+    def control_statement(self, tree: Tree):
+        # do not evaluate until execution is reached
+        if self._should_not_eval():
+            return tree
+
+        items = cast(List, tree.children)
+
+        if_cond, _, if_block, _ = items[:4]
+
+        if if_cond:
+            return self.transform(if_block)
+
+        if len(items) < 5:
+            return
+
+        next_ind = 4
+        while len(items) > next_ind + 4:
+            next_ = items[next_ind]
+            if next_ is not None:
+                # else if block
+
+                if_cond, _, if_block, _ = items[next_ind : next_ind + 4]
+                next_ind += 4
+                if if_cond:
+                    return self.transform(if_block)
+            else:
+                break
+
+        if len(items) > next_ind:
+            _, else_block, _ = items[next_ind:]
+
+            if else_block is None:
+                return
+
+            return self.transform(else_block)
+
+        raise LikeSyntaxError("Control statement go brr")

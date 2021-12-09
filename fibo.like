@@ -1,0 +1,8 @@
+fn fibo(a, b, n) {
+    if a+b <= n {
+        print(a+b)
+        fibo(b, a+b, n)
+    }
+}
+
+fibo(0, 1, 10000)

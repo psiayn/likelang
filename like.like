@@ -62,3 +62,60 @@ fn func() {
 // funcVar(100)
 let a = true
 print(a)
+
+if false {
+    print("true")
+}
+
+if false {
+    print("false")
+} else {
+    print("true")
+}
+
+let a = 10
+let b = 20
+let c = 20
+
+if a > b {
+    print("in if")
+} else if b > c {
+    print("in else if")
+} else {
+    print("in else")
+}
+
+if a > b {
+    print("in if")
+} else if b > c {
+    print("in else if")
+} else if c >= b {
+    print("in else if no. 2")
+} else {
+    print("in else")
+}
+
+if c > b {
+    print("in if")
+} else if b > a {
+    print("in else if")
+} else {
+    print("in else")
+}
+
+if a < b {
+    print("in if")
+} else if b > a {
+    print("in else if")
+} else {
+    print("in else")
+}
+
+fn test(abc, bcd) {
+    let abc = abc + 10
+    print(abc)
+    if abc + bcd < 50 {
+        print("hmm it works")
+    }
+    }
+test(10, 20)

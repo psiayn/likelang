@@ -4,7 +4,6 @@ start: statements+
            | assignment+
            | expression
            | collect+
-           | control_statements+
 
 function: "fn" identifier params start_fn "{" block "}" end_fn
 
@@ -34,10 +33,14 @@ block: statements*
           | collect_call
           | func_call
           | ESCAPED_STRING -> string
+          | control_statement
 
 ?conditional: expression conditional_operator expression
-            | "!" expression
+            | not expression
             | boolean
+
+not: "not"
+   | "!"
 
 operator: "+" -> add
         | "-" -> sub
@@ -51,8 +54,7 @@ conditional_operator: "==" -> eq
         | "<=" -> lte
         | "!=" -> ne
 
-control_statements: "if" conditional "{" block "}"
-                | "if" conditional "{" block "}" "else" "{" block "}"
+control_statement: "if" conditional start_fn "{" block "}" end_fn [ ( "else" "if" conditional start_fn "{" block "}" end_fn )* ] [ "else" start_fn "{" block "}" end_fn ]
 
 boolean: "true" -> true
         | "false" -> false
