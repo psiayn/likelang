@@ -12,7 +12,6 @@ import like_types
 class LikeSyntaxError(Exception):
     pass
 
-
 class LikeEvaluator(Transformer):
     def __init__(self):
         self._scopes: List[Dict[str, Any]] = [{}]
@@ -139,6 +138,12 @@ class LikeEvaluator(Transformer):
             )
             print(*args)
             return None
+
+        if name == "input":
+            if len(args) != 0:
+                raise LikeSyntaxError("input expects no args!")
+            inp = input()
+            return inp
 
         ident_scope = self._get_ident(name)
         if not ident_scope:

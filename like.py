@@ -1,6 +1,6 @@
 from lark import Lark
 
-from eval import LikeEvaluator
+from eval import LikeEvaluator, LikeSyntaxError
 
 import sys
 
@@ -11,9 +11,11 @@ with open("like.lark") as f:
 
 with open(filename) as f:
     lark_lang = f.read()
-
-ast = lark_parser.parse(lark_lang)
-
-# print(ast.pretty())
-
-res = LikeEvaluator().transform(ast)
+try:
+    ast = lark_parser.parse(lark_lang)
+    # print(ast.pretty())
+    res = LikeEvaluator().transform(ast)
+except LikeSyntaxError as le:
+    print(le)
+except Exception as e:
+    print(e)
